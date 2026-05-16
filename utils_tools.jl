@@ -48,7 +48,3 @@ function prepare_data(X, y; do_normal=true, do_onehot=true, kwargs...)
     return X_train', y_train, X_test', y_test, classes
 end
 
-
-mean_tuple(d::AbstractArray{<:Tuple}) = Tuple([mean([d[k][i] for k in eachindex(d)]) for i in 1:length(d[1])])
-grad_total(modelo,grad,X_train,y_train) = mean_tuple([grad(modelo, X_train[:,k], y_train[:,k]) for k in 1:size(X_train,2)])
-
