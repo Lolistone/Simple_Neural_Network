@@ -1,3 +1,102 @@
-# A (Simple) Neural Network and Gradient Descent.
+# Neural Network & Gradient Descent
 
-In this project we implemented a simple neural network with one hidden layer from scratch. Also, we implemented different descent methods to train the model and compare its performance. Theoretical aspects are mentioned.
+A neural network with one hidden layer implemented from scratch in Julia, trained on the classic Iris dataset using gradient descent and backpropagation.
+
+---
+
+## Architecture
+
+```
+Input (4)  →  [W₁, b₁]  →  Hidden (5, ReLU)  →  [W₂, b₂]  →  Output (3, Softmax)
+```
+
+| Layer  | Shape      | Activation |
+| ------ | ---------- | ---------- |
+| Input  | 4 features | —          |
+| Hidden | 5 neurons  | ReLU       |
+| Output | 3 classes  | Softmax    |
+
+The loss function is **cross-entropy**, averaged over the training set. Training uses **gradient descent at constant step size** with **early stopping** based on validation loss (patience = 20 iterations without improvement).
+
+---
+
+## Project structure
+
+```
+.
+├── main.jl              # Entry point: data loading, training, evaluation
+├── neural_network.jl    # NeuralNetwork struct, forward_pass, grad (backprop), loss
+├── gradient_descent.jl  # Optimizer abstract type, GradientDescent, train!
+├── utils_tools.jl       # Data preprocessing: split, normalize, onehot, prepare_data
+├── evaluation.jl        # Inference: predict, accuracy (test), results plot
+├── Project.toml         # Direct dependencies
+├── Manifest.toml        # Full dependency tree (pinned versions)
+├── iris.png             # Scatter plots: petal and sepal dimensions by species
+└── loss.png             # Training and validation loss curves with early stop marker
+```
+
+### File responsibilities
+
+- **`neural_network.jl`** — defines the `NeuralNetwork{T}` struct (parametric on float type) and all core math: forward pass, backpropagation via `grad`, and `cross_entropy` / `loss_total`.
+- **`gradient_descent.jl`** — defines an `Optimizer` abstract type (extensible to other methods) and implements `GradientDescent` with a `train!` loop that records both train and validation loss at each iteration.
+- **`utils_tools.jl`** — data pipeline helpers: reproducible train/test split (seeded), z-score normalization (fitted on train only, applied to test), and one-hot encoding.
+- **`evaluation.jl`** — evaluation utilities: `predict` (argmax over softmax output), `test` (prints accuracy), and `results` (loss curve plot with early stop marker).
+- **`main.jl`** — wires everything together: loads Iris, prepares data, initializes the model with random weights, runs training, and saves plots.
+
+---
+
+## Quickstart
+
+**Requirements:** Julia ≥ 1.9
+
+Clone the repo and instantiate the environment:
+
+```julia
+using Pkg
+Pkg.activate(".")
+Pkg.instantiate()   # installs exact versions from Manifest.toml
+```
+
+**Run:**
+
+```bash
+julia main.jl
+```
+
+This will:
+
+1. Load and visualize the Iris dataset → `iris.png`
+2. Split into 80% train / 20% test, normalize features, one-hot encode labels
+3. Train the network with `α = 0.1` for up to 10 000 iterations (early stop at iteration 483 in a typical run)
+4. Save the loss curve → `loss.png` and print test accuracy
+
+---
+
+## Results
+
+| Metric          | Value |
+| --------------- | ----- |
+| Early stop iter | 483   |
+| Test accuracy   | ≥ 95% |
+
+![Loss curve](loss.png)
+![Iris scatter](iris.png)
+
+---
+
+## Planned extensions (Ejercicio 5)
+
+The `Optimizer` abstract type in `gradient_descent.jl` is designed for easy extension. Each method will return convergence status, number of iterations, and final `‖∇f‖`.
+
+- [ ] Gradient descent with Armijo line search
+- [ ] Newton's method
+- [ ] Nonlinear Conjugate Gradient (Fletcher–Reeves)
+- [ ] Quasi-Newton BFGS
+
+Performance will be compared using a Dolan & Moré performance profile over iteration count.
+
+---
+
+## Dataset
+
+[Iris](https://archive.ics.uci.edu/ml/datasets/iris) — 150 samples, 3 species (_setosa_, _versicolor_, _virginica_), 4 features (petal/sepal length and width). Loaded via `RDatasets.jl`.
