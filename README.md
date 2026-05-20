@@ -1,4 +1,4 @@
-# Neural Network & Gradient Descent
+# A (simple) Neural Network & Gradient Descent.
 
 A neural network with one hidden layer implemented from scratch in Julia, trained on the classic Iris dataset using gradient descent and backpropagation.
 
