@@ -45,33 +45,6 @@ The loss function is **cross-entropy**, averaged over the training set. Training
 
 ---
 
-## Quickstart
-
-**Requirements:** Julia ≥ 1.9
-
-Clone the repo and instantiate the environment:
-
-```julia
-using Pkg
-Pkg.activate(".")
-Pkg.instantiate()   # installs exact versions from Manifest.toml
-```
-
-**Run:**
-
-```bash
-julia main.jl
-```
-
-This will:
-
-1. Load and visualize the Iris dataset → `iris.png`
-2. Split into 80% train / 20% test, normalize features, one-hot encode labels
-3. Train the network with `α = 0.1` for up to 10 000 iterations (early stop at iteration 483 in a typical run)
-4. Save the loss curve → `loss.png` and print test accuracy
-
----
-
 ## Results
 
 | Metric          | Value |
@@ -80,20 +53,15 @@ This will:
 | Test accuracy   | ≥ 95% |
 
 ![Loss curve](loss.png)
-![Iris scatter](iris.png)
 
 ---
 
-## Planned extensions (Ejercicio 5)
+## Planned extensions
 
-The `Optimizer` abstract type in `gradient_descent.jl` is designed for easy extension. Each method will return convergence status, number of iterations, and final `‖∇f‖`.
+The `Optimizer` abstract type in `gradient_descent.jl` is designed for easy extension.
 
 - [ ] Gradient descent with Armijo line search
-- [ ] Newton's method
 - [ ] Nonlinear Conjugate Gradient (Fletcher–Reeves)
-- [ ] Quasi-Newton BFGS
-
-Performance will be compared using a Dolan & Moré performance profile over iteration count.
 
 ---
 
