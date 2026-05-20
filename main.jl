@@ -1,11 +1,9 @@
 using LinearAlgebra, RDatasets, Random, Statistics, Plots
 
-# Importamos las que implementamos en los otros archivos.
-# main.jl
-include("utils_tools.jl")       # sin dependencias
-include("neural_network.jl")    # sin dependencias
-include("gradient_descent.jl")  # usa NeuralNetwork
-include("test.jl")        # usa NeuralNetwork + forward_pass
+include("utils_tools.jl")       
+include("neural_network.jl")    
+include("gradient_descent.jl")  
+include("test.jl")        
 
 # Importamos el dataset. 
 iris = dataset("datasets", "iris")
@@ -23,15 +21,10 @@ p1 = scatter(iris.PetalLength, iris.PetalWidth, group=iris.Species,
 p2 = scatter(iris.SepalLength, iris.SepalWidth, group=iris.Species, 
              xlabel="Sepal Length", ylabel="Sepal Width", title="Sepals")
 
-p3 = scatter(iris.PetalLength, iris.SepalWidth, iris.SepalLength, group=iris.Species, 
-             xlabel="Petal Length", ylabel="Sepal Width", zlabel="Sepal Length", 
-             title="3D Scatter of Iris Dataset")
+savefig(plot(p1, p2, layout=(1,2), size=(900, 400), legend=:topleft), "iris.png")
 
-display(plot(p1, p2, layout=(1,2), size=(900, 400), legend=:topleft))
-display(p3)
-
-# Preparamos nuestros datos de entrenamiento.
-X_train, y_train, X_test, y_test, classes = prepare_data(X, y)
+# Preparamos nuestros datos de entrenamiento. Fijamos una seed para poder replicar.
+X_train, y_train, X_test, y_test, classes = prepare_data(X, y, seed = 2012)
 
 # Chequeamso que todo esté en orden.
 println("Predictors: ", size(X_train, 1))  
@@ -44,7 +37,12 @@ model = NeuralNetwork(rand(5,4), rand(5), rand(3,5), rand(3))
 opt = GradientDescent(0.1)
 
 # Entrenamos la red neuronal.
-train!(opt, model, X_train, y_train, 100)
+model, loss_train, loss_val, best_iter = train!(opt, model, X_train, y_train, X_test, y_test, 10000)
 
-# Testeamos el modelo.
-accuracy = test(model, X_test, y_test)
+p = results(loss_train, loss_val, best_iter)
+
+# Muestra los resultados
+savefig(plot(p, layout=(1,2), size=(900, 400), legend=:topleft), "loss.png")
+
+# Medimos la accuracy del modelo.
+test(model, X_test, y_test)

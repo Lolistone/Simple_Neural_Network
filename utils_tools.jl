@@ -1,10 +1,14 @@
-function split(X, y; dims=1, ratio_train=0.8)
+# Funciones auxiliares para preparar los datos.
+
+# "Mezclamos" y dividimos el dataset en entrenamiento y testeo.
+function split(X, y; dims=1, ratio_train=0.8, seed = 1212)
     n = length(y)
 	
-    n_train = round(Int, ratio_train*n) # Round the cutoff to an integer
-    i_rand = randperm(n)				# Generate a random permutation of indices from 1 to n
-    i_train = i_rand[1:n_train] 		# Use the first n_train indices for training
-    i_test = i_rand[n_train+1:end] 		# Everything else is for testing
+    rng = Xoshiro(seed)
+    n_train = round(Int, ratio_train*n) 
+    i_rand = randperm(rng ,n)				
+    i_train = i_rand[1:n_train] 		
+    i_test = i_rand[n_train+1:end] 		
 
 	X_train = X[i_train,:]
 	y_train = y[i_train]
@@ -15,6 +19,7 @@ function split(X, y; dims=1, ratio_train=0.8)
 
 end
 
+# Normalizamos los datos.
 function normalize(X_train, X_test; dims=1)
     col_mean = mean(X_train; dims)
     col_std = std(X_train; dims)
@@ -22,6 +27,7 @@ function normalize(X_train, X_test; dims=1)
     return (X_train .- col_mean) ./ col_std, (X_test .- col_mean) ./ col_std
 end
 
+# Representamos cada clase con un vector.
 function onehot(y, classes)
 	y_onehot = zeros(length(classes), length(y))
 	
@@ -31,8 +37,8 @@ function onehot(y, classes)
 	return y_onehot
 end
 
-function prepare_data(X, y; do_normal=true, do_onehot=true, kwargs...)
-    X_train, y_train, X_test, y_test = split(X, y)
+function prepare_data(X, y; do_normal=true, do_onehot=true, seed = 2012, kwargs...)
+    X_train, y_train, X_test, y_test = split(X, y, seed = seed)
 
     if do_normal
         X_train, X_test = normalize(X_train, X_test; kwargs...)
