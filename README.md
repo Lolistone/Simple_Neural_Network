@@ -29,17 +29,6 @@ A neural network with one hidden layer implemented from scratch in Julia, traine
 
 ---
 
-## Results
-
-| Metric          | Value |
-| --------------- | ----- |
-| Early stop iter | 483   |
-| Test accuracy   | ≥ 95% |
-
-![Loss curve](loss.png)
-
----
-
 ## Planned extensions
 
 The `Optimizer` abstract type in `gradient_descent.jl` is designed for easy extension.
