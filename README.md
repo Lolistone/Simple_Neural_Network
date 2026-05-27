@@ -4,22 +4,6 @@ A neural network with one hidden layer implemented from scratch in Julia, traine
 
 ---
 
-## Architecture
-
-```
-Input (4)  →  [W₁, b₁]  →  Hidden (5, ReLU)  →  [W₂, b₂]  →  Output (3, Softmax)
-```
-
-| Layer  | Shape      | Activation |
-| ------ | ---------- | ---------- |
-| Input  | 4 features | —          |
-| Hidden | 5 neurons  | ReLU       |
-| Output | 3 classes  | Softmax    |
-
-The loss function is **cross-entropy**, averaged over the training set. Training uses **gradient descent at constant step size** with **early stopping** based on validation loss (patience = 20 iterations without improvement).
-
----
-
 ## Project structure
 
 ```
