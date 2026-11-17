@@ -52,3 +52,14 @@ end
 function loss_total(model::NeuralNetwork, X, Y)
     return cross_entropy(forward_pass(model, X), Y) / size(X, 2)
 end
+
+# Inicializamos la red con pesos aleatorios (He, pensada para ReLU) y sesgos nulos.
+# Fijamos una seed para poder replicar.
+function init_network(n_in, n_hidden, n_out; seed = 2012)
+    rng = Xoshiro(seed)
+    W1 = randn(rng, n_hidden, n_in) * sqrt(2 / n_in)
+    b1 = zeros(n_hidden)
+    W2 = randn(rng, n_out, n_hidden) * sqrt(2 / n_hidden)
+    b2 = zeros(n_out)
+    return NeuralNetwork(W1, b1, W2, b2)
+end
