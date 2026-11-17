@@ -1,83 +1,54 @@
-using LinearAlgebra
-
-# Red neuronal con 2 capas ocultas.
-mutable struct NeuralNetwork{T <:AbstractFloat}
-    W1::Matrix{T}  
-    b1::Vector{T}  
-    W2::Matrix{T}  
-    b2::Vector{T}  
+# Red neuronal con una capa oculta.
+mutable struct NeuralNetwork{T <: AbstractFloat}
+    W1::Matrix{T}
+    b1::Vector{T}
+    W2::Matrix{T}
+    b2::Vector{T}
 end
 
-# Funcion de activación.
-function softmax(x)
-    return exp.(x) ./ sum(exp.(x))
-end 
-
-# Utilizamos ReLu y Softmax como funciones de activación.
-function forward_pass(model::NeuralNetwork, x) 
-    a1 = x 
-    z1 = model.W1 * a1 .+ model.b1
-    a2 = max.(0, z1)                # ReLU
-    z2 = model.W2 * a2 .+ model.b2
-    a3 = softmax(z2)  # Softmax
-    return a3
+# Softmax por columnas. Restamos el máximo para evitar overflow.
+function softmax(Z)
+    E = exp.(Z .- maximum(Z; dims=1))
+    return E ./ sum(E; dims=1)
 end
 
-# Obs: relu es una matriz cuadrada con 0 fueras de la diagonal, la pensamos como vector.
-function relu_derivative(x)
-    return Float64.(x .> 0)
+# Utilizamos ReLU y Softmax como funciones de activación.
+# Sirve para un dato (vector) o para varios a la vez (matriz, un dato por columna).
+function forward_pass(model::NeuralNetwork, X)
+    A2 = max.(0, model.W1 * X .+ model.b1)   # ReLU
+    return softmax(model.W2 * A2 .+ model.b2) # Softmax
 end
 
-# Backpropagation.
-function grad(model::NeuralNetwork, x, y) 
-    
-    # Evitamos que las soluciones exploten.
-    tol = 10e-8
-    
-    a1      = x
-    y_hat   = forward_pass(model, x) 
-    a2      = max.(0, model.W1*a1 + model.b1)
+# Obs: la derivada de ReLU es una matriz diagonal, la pensamos como vector.
+relu_derivative(x) = Float64.(x .> 0)
 
-    delta_2 = y_hat .- y 
-    delta_1 = relu_derivative(model.W1 * a1 .+ model.b1) .* (model.W2' * delta_2)
-    
-    # Derivada parcial respecto de W_1.
-    W1_part = delta_1 * a1'
-    
-    # Derivada parcial respecto de b_1    
-    b1_part = delta_1
+# Backpropagation. Devuelve el gradiente promedio sobre todos los datos
+# (columnas de X), que usamos como dirección de descenso.
+function grad(model::NeuralNetwork, X, Y)
+    n = size(X, 2)
 
-    # Derivada parcial respecto de W_2
-    W2_part = delta_2 * a2'
+    Z1 = model.W1 * X .+ model.b1
+    A2 = max.(0, Z1)
+    Y_hat = softmax(model.W2 * A2 .+ model.b2)
 
-    # Derivada parcial respecto de b_2
-    b2_part = delta_2
+    delta_2 = Y_hat .- Y
+    delta_1 = relu_derivative(Z1) .* (model.W2' * delta_2)
+
+    # Derivadas parciales respecto de W_1, b_1, W_2 y b_2.
+    W1_part = delta_1 * X' / n
+    b1_part = vec(sum(delta_1; dims=2)) / n
+    W2_part = delta_2 * A2' / n
+    b2_part = vec(sum(delta_2; dims=2)) / n
 
     return (W1_part, b1_part, W2_part, b2_part)
-
 end
 
-# Promediamos los gradientes de cada dato, utilizaremos esto como dirección de descenso.
-function mean_tuple(d::AbstractArray{<:Tuple})
-    return Tuple([mean([d[k][i] for k in eachindex(d)]) for i in 1:length(d[1])])
+# Función de pérdida (suma sobre todos los datos).
+function cross_entropy(Y_hat, Y; tol = 1e-10)
+    return -sum(Y .* log.(Y_hat .+ tol))
 end
 
-function grad_total(model, grad, X, y) 
-    return mean_tuple([grad(model, X[:,k], y[:,k]) for k in 1:size(X,2)])
-end
-
-# Función de perdida
-function cross_entropy(y_hat::Vector{Float64}, y::Vector{Float64}; tol = 1e-10)
-    return -sum(y .* log.(y_hat .+ tol))
-end
-
-# Calculamos la pérdida toal.
+# Calculamos la pérdida total (promedio por dato).
 function loss_total(model::NeuralNetwork, X, Y)
-    n = size(X, 2)
-    total = 0.0
-    for i in 1:n
-        y_hat = forward_pass(model, X[:, i])
-        total += cross_entropy(y_hat, Y[:, i])
-    end
-    return total / n
+    return cross_entropy(forward_pass(model, X), Y) / size(X, 2)
 end
