@@ -5,7 +5,7 @@ One-hidden-layer neural network (ReLU + softmax) implemented from scratch in Jul
 ## Run
 
 ```bash
-julia --project main.jl
+julia main.jl
 ```
 
 Prints the test accuracy and saves `iris.png` and `loss.png`.
