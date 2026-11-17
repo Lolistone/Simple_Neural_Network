@@ -5,7 +5,7 @@ One-hidden-layer neural network (ReLU + softmax) implemented from scratch in Jul
 ## Run
 
 ```bash
-julia --project main.jl
+julia main.jl
 ```
 
 Prints the test accuracy and saves `img/loss.png`. Data is split 60/20/20 (train/validation/test) and a single seed makes runs reproducible.
@@ -17,6 +17,8 @@ Prints the test accuracy and saves `img/loss.png`. Data is split 60/20/20 (train
 - `gradient_descent.jl`: `Optimizer` type, `GradientDescent` and `train!`.
 - `utils_tools.jl`: split, standardization and one-hot encoding.
 - `evaluation.jl`: `predict`, `accuracy` and the loss plot.
+
+## Results
 
 ![Loss](img/loss.png)
 
