@@ -18,7 +18,8 @@ Prints the test accuracy and saves `iris.png` and `loss.png`.
 - `utils_tools.jl`: split, standardization and one-hot encoding.
 - `evaluation.jl`: `predict`, `accuracy` and the loss plot.
 
-![Iris](img/iris.png)
+## Resultados
+
 ![Loss](img/loss.png)
 
 ## To do
